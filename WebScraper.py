@@ -1,4 +1,5 @@
 import urllib.request
+from collections import namedtuple
 from bs4 import BeautifulSoup
 
 def run(url):
@@ -9,11 +10,15 @@ def run(url):
        1. if page isn't found
        2. if page structure changes
     """
+    #container to return song info
+    Song = namedtuple("Song", "title artist lyrics")
+
     soup = get_soup(url)
     title = get_title(soup)
     artist = get_artist(soup)
     lyrics = get_lyrics(soup)
-    return [title, artist, lyrics]
+
+    return Song(title=title, artist=artist, lyrics=lyrics)
 
 def get_soup(url):
     """
