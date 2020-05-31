@@ -87,7 +87,8 @@ def nav_to_creation_page(driver):
     CREATE_TEXT = "CREATE"
     NEW_QUIZ_TEXT = "CREATE A QUIZ"
 
-    WebDriverWait(driver, 45)
+    WebDriverWait(driver, 45).until(
+            EC.presence_of_element_located((By.LINK_TEXT, CREATE_TEXT)))
     #store element to hover over to get the "create a quiz" link
     hover_elem = driver.find_element_by_link_text(CREATE_TEXT)
 
@@ -123,9 +124,41 @@ def nav_creation_page(driver, scrape_data):
     driver.find_element_by_id(NAME_ID).send_keys(prompt)
 
     #submit
-    driver.find_element_by_id(SUBMIT_BTN_ID).click()
+    submit_btn = driver.find_element_by_id(SUBMIT_BTN_ID)
+    timeoutCatcher(driver, submit_btn.click)
 
-#def nav_quiz_detail_page(driver, scrape_data):
+def nav_quiz_edit_page(driver, scrape_data):
+    """
+    :param driver: selenium driver. Should currently be the page for entering the
+                   details of the quiz
+    :param scrape_data: named tuple of song data. Title, artist, lyrics
+
+    Enters details for the quiz and submits brings to the test page.
+    """
+    #text prompts
+    desc_prompt = f'Can you recite the lyrics of {scrape_data.title} by {scrape_data.artist}?'
+    answer_type = "Lyric"
+
+    #HTML constants for element id/class names
+    DESC_NAME = "game_rightlingo"
+    TIMER_NAME = "game_timer"
+    ANSWER_TYPE_NAME = "game_enter_lingo"
+    HINT_HEADING_NAME = "game_element_name"
+    ANSWER_HEADING_NAME = "game_element_value"
+    CATEGORY_NAME = "category"
+
+    #wait until elements are loaded
+    WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.NAME, DESC_NAME)))
+
+    #fill out form input fields
+    driver.find_element_by_name(DESC_NAME).send_keys(desc_prompt)
+
+    input_answer_type = driver.find_element_by_name(ANSWER_TYPE_NAME)
+    input_answer_type.clear()
+    input_answer_type.send_keys(answer_type)
+    driver.find_element_by_name(HINT_HEADING_NAME).clear()
+    driver.find_element_by_name(ANSWER_HEADING_NAME).clear()
 
 if __name__ == "__main__":
     Song = namedtuple("Song", "title artist lyrics")
@@ -136,4 +169,5 @@ if __name__ == "__main__":
     nav_login_page(driver)
     nav_to_creation_page(driver)
     nav_creation_page(driver, SL)
+    nav_quiz_edit_page(driver, SL)
     #driver.close()
