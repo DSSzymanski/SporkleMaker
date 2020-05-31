@@ -6,11 +6,36 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+
+#for timeout of main page load
+from selenium.common.exceptions import TimeoutException
+
+def timeoutCatcher(driver, func, arg=None):
+    """
+    :param driver: selenium driver
+    :param func: function to be ran that loads new web page
+    :param arg: argument to be passed into function
+
+    Ends long running scripts that don't effect web page when page is loaded
+    """
+    try:
+        if arg: func(arg)
+        else: func()
+    except TimeoutException:
+        driver.execute_script("window.stop();")
 
 def setup_driver():
+    """
+    Sets up driver and loads sporcle in a firefox page
+    """
     SPORCLE_QUIZ = "https://www.sporcle.com"
     driver = webdriver.Firefox()
-    driver.get(SPORCLE_QUIZ)
+    driver.set_page_load_timeout(30)
+
+    #get base sporcle page
+    timeoutCatcher(driver, driver.get, SPORCLE_QUIZ)
+
     return driver
 
 def nav_login_page(driver):
@@ -31,16 +56,9 @@ def nav_login_page(driver):
     SUBMIT_BTN_C_NAME = "log-in-button"
 
     """
-    wait for page to fully load. Login button seems to not load unil last
-    200 second wait because firefox page first load seems to take forever on
-    shitty wifi
-    """
-    """
     TODO: driver page seems to NOT load login button (and a few others) if a
     sporcle page is open in mozilla in another window
     """
-    WebDriverWait(driver, 200).until(
-            EC.presence_of_element_located((By.ID, LOGIN_BTN_ID)))
 
     #click login button to open new frame to login
     driver.find_element_by_id(LOGIN_BTN_ID).click()
@@ -52,21 +70,54 @@ def nav_login_page(driver):
     #enter login information and submit login
     driver.find_element_by_class_name(USERNAME_C_NAME).send_keys(USER_EMAIL)
     driver.find_element_by_class_name(PASSWORD_C_NAME).send_keys(USER_PASSWORD)
-    driver.find_element_by_class_name(SUBMIT_BTN_C_NAME).click()
+    submit = driver.find_element_by_class_name(SUBMIT_BTN_C_NAME)
+
+    #submits and loads new page
+    timeoutCatcher(driver=driver, func=submit.click)
+
+def nav_to_creation_page(driver):
+    """
+    :param driver: selenium driver. Should be on sporcle home page already
+        logged in
+
+    Finds "CREATE" in header, hovers over it, then selects the create a quiz
+    link to navigate to quiz creation page
+    """
+    #element names
+    CREATE_TEXT = "CREATE"
+    NEW_QUIZ_TEXT = "CREATE A QUIZ"
+
+    #store element to hover over to get the "create a quiz" link
+    hover_elem = driver.find_element_by_link_text(CREATE_TEXT)
+
+    #execute hover
+    actions = ActionChains(driver)
+    actions.move_to_element(hover_elem)
+    actions.perform()
+
+    #store new quiz element and click
+    new_quiz_elem = driver.find_element_by_link_text(NEW_QUIZ_TEXT)
+    actions.click(new_quiz_elem)
+    actions.perform()
 
 def nav_creation_page(scraper_list):
     """
     TODO: access "game_name" input box and insert song title name
     TODO: access "quiz_type" select box and make sure option 0: "Classic" is selected
     TODO: access "submit" button and click
-    """
+
     song_name = scraper_list[0]
     driver.find_element_by_name("game_name").send_keys(song_name)
+    """
+    pass
 
 if __name__ == "__main__":
     Song = namedtuple("Song", "title artist lyrics")
     SL = ["Childhood's End", "Iron Maiden", ["hi", "my"]] #testing
+
     driver = setup_driver()
+
     nav_login_page(driver)
+    nav_to_creation_page(driver)
     #nav_creation_page(SL)
     #driver.close()
