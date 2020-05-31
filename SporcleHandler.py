@@ -83,10 +83,11 @@ def nav_to_creation_page(driver):
     Finds "CREATE" in header, hovers over it, then selects the create a quiz
     link to navigate to quiz creation page
     """
-    #element names
+    #HTML constants for element id/class names
     CREATE_TEXT = "CREATE"
     NEW_QUIZ_TEXT = "CREATE A QUIZ"
 
+    WebDriverWait(driver, 45)
     #store element to hover over to get the "create a quiz" link
     hover_elem = driver.find_element_by_link_text(CREATE_TEXT)
 
@@ -95,29 +96,44 @@ def nav_to_creation_page(driver):
     actions.move_to_element(hover_elem)
     actions.perform()
 
+    WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.LINK_TEXT, NEW_QUIZ_TEXT)))
     #store new quiz element and click
     new_quiz_elem = driver.find_element_by_link_text(NEW_QUIZ_TEXT)
     actions.click(new_quiz_elem)
     actions.perform()
 
-def nav_creation_page(scraper_list):
+def nav_creation_page(driver, scrape_data):
     """
-    TODO: access "game_name" input box and insert song title name
-    TODO: access "quiz_type" select box and make sure option 0: "Classic" is selected
-    TODO: access "submit" button and click
+    :param driver: selenium driver. Should currently be the quiz creating page
+    :param scrape_data: named tuple of song data. Title, artist, lyrics
 
-    song_name = scraper_list[0]
-    driver.find_element_by_name("game_name").send_keys(song_name)
+    Navigates the sporcle page for creating the quiz
     """
-    pass
+    #Quiz name
+    prompt = f'{scrape_data.title} lyrics by {scrape_data.artist}?'
+
+    #HTML constants for element id/class names
+    NAME_ID = "game_name"
+    SUBMIT_BTN_ID = "submit"
+
+    WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.ID, NAME_ID)))
+    #sends prompt to quiz name field
+    driver.find_element_by_id(NAME_ID).send_keys(prompt)
+
+    #submit
+    driver.find_element_by_id(SUBMIT_BTN_ID).click()
+
+#def nav_quiz_detail_page(driver, scrape_data):
 
 if __name__ == "__main__":
     Song = namedtuple("Song", "title artist lyrics")
-    SL = ["Childhood's End", "Iron Maiden", ["hi", "my"]] #testing
+    SL = Song(title="Childhood's End", artist="Iron Maiden", lyrics=["hi", "my"]) #testing
 
     driver = setup_driver()
 
     nav_login_page(driver)
     nav_to_creation_page(driver)
-    #nav_creation_page(SL)
+    nav_creation_page(driver, SL)
     #driver.close()
