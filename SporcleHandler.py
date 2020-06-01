@@ -135,6 +135,7 @@ def nav_quiz_edit_page(driver, scrape_data):
 
     Enters details for the quiz and submits brings to the test page.
     """
+
     #text prompts
     desc_prompt = f'Can you recite the lyrics of {scrape_data.title} by {scrape_data.artist}?'
     answer_type = "Lyric"
@@ -146,10 +147,15 @@ def nav_quiz_edit_page(driver, scrape_data):
     HINT_HEADING_NAME = "game_element_name"
     ANSWER_HEADING_NAME = "game_element_value"
     CATEGORY_NAME = "category"
+    SAVE_BTN_NAME = "submitgame"
+    DATA_TAB_ID = "elementstab"
 
     #wait until elements are loaded
     WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.NAME, DESC_NAME)))
+
+    timer_elem = driver.find_element_by_name(TIMER_NAME)
+    category_elem = driver.find_element_by_name(CATEGORY_NAME)
 
     #fill out form input fields
     driver.find_element_by_name(DESC_NAME).send_keys(desc_prompt)
@@ -157,8 +163,37 @@ def nav_quiz_edit_page(driver, scrape_data):
     input_answer_type = driver.find_element_by_name(ANSWER_TYPE_NAME)
     input_answer_type.clear()
     input_answer_type.send_keys(answer_type)
+
     driver.find_element_by_name(HINT_HEADING_NAME).clear()
     driver.find_element_by_name(ANSWER_HEADING_NAME).clear()
+
+    #fillout form quiz timer select field
+    actions = ActionChains(driver)
+
+    actions.move_to_element(timer_elem)
+    actions.click(timer_elem)
+    actions.perform()
+
+    driver.find_element_by_xpath("//select[@name='game_timer']/option[text() = '15:00']").click()
+
+    #scroll down
+    driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+
+    #fillout form category select field
+    actions.move_to_element(category_elem)
+    actions.click(category_elem)
+    actions.perform()
+
+    driver.find_element_by_xpath("//select[@name='category']/option[text() = 'Music']").click()
+
+    #save changes
+    driver.find_element_by_name(SAVE_BTN_NAME).click()
+
+    #open data tab
+    data_btn = driver.find_element_by_id(DATA_TAB_ID)
+    timeoutCatcher(driver, data_btn.click)
+
+
 
 if __name__ == "__main__":
     Song = namedtuple("Song", "title artist lyrics")
@@ -170,4 +205,5 @@ if __name__ == "__main__":
     nav_to_creation_page(driver)
     nav_creation_page(driver, SL)
     nav_quiz_edit_page(driver, SL)
+    nav_quiz_data_page(driver, SL)
     #driver.close()
