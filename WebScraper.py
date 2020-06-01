@@ -11,14 +11,14 @@ def run(url):
        2. if page structure changes
     """
     #container to return song info
-    Song = namedtuple("Song", "title artist lyrics")
+    Song = namedtuple("Song", "title artist lyrics sourceurl")
 
     soup = get_soup(url)
     title = get_title(soup)
     artist = get_artist(soup)
     lyrics = get_lyrics(soup)
 
-    return Song(title=title, artist=artist, lyrics=lyrics)
+    return Song(title=title, artist=artist, lyrics=lyrics, sourceurl=url)
 
 def get_soup(url):
     """

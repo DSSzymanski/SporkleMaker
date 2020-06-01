@@ -20,8 +20,10 @@ def timeoutCatcher(driver, func, arg=None):
     Ends long running scripts that don't effect web page when page is loaded
     """
     try:
-        if arg: func(arg)
-        else: func()
+        if arg:
+            func(arg)
+        else:
+            func()
     except TimeoutException:
         driver.execute_script("window.stop();")
 
@@ -149,6 +151,7 @@ def nav_quiz_edit_page(driver, scrape_data):
     CATEGORY_NAME = "category"
     SAVE_BTN_NAME = "submitgame"
     DATA_TAB_ID = "elementstab"
+    SOURCE_NAME = "sourceurl"
 
     #wait until elements are loaded
     WebDriverWait(driver, 30).until(
@@ -166,6 +169,7 @@ def nav_quiz_edit_page(driver, scrape_data):
 
     driver.find_element_by_name(HINT_HEADING_NAME).clear()
     driver.find_element_by_name(ANSWER_HEADING_NAME).clear()
+    driver.find_element_by_name(SOURCE_NAME).send_keys(scrape_data.sourceurl)
 
     #fillout form quiz timer select field
     actions = ActionChains(driver)
@@ -229,8 +233,8 @@ def nav_quiz_data_page(driver, scrape_data):
     driver.find_element_by_class_name(IMPORT_C).click()
 
 if __name__ == "__main__":
-    Song = namedtuple("Song", "title artist lyrics")
-    SL = Song(title="Childhood's End", artist="Iron Maiden", lyrics=["hi", "my"]) #testing
+    Song = namedtuple("Song", "title artist lyrics sourceurl")
+    SL = Song(title="Childhood's End", artist="Iron Maiden", lyrics=["hi", "my"], sourceurl = "https://www.lyrics.com/lyric/36440596/Childhood%E2%80%99s+End") #testing
 
     driver = setup_driver()
 
