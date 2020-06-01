@@ -88,7 +88,7 @@ def nav_to_creation_page(driver):
     NEW_QUIZ_TEXT = "CREATE A QUIZ"
 
     WebDriverWait(driver, 45).until(
-            EC.presence_of_element_located((By.LINK_TEXT, CREATE_TEXT)))
+        EC.presence_of_element_located((By.LINK_TEXT, CREATE_TEXT)))
     #store element to hover over to get the "create a quiz" link
     hover_elem = driver.find_element_by_link_text(CREATE_TEXT)
 
@@ -152,7 +152,7 @@ def nav_quiz_edit_page(driver, scrape_data):
 
     #wait until elements are loaded
     WebDriverWait(driver, 30).until(
-            EC.presence_of_element_located((By.NAME, DESC_NAME)))
+        EC.presence_of_element_located((By.NAME, DESC_NAME)))
 
     timer_elem = driver.find_element_by_name(TIMER_NAME)
     category_elem = driver.find_element_by_name(CATEGORY_NAME)
@@ -193,7 +193,40 @@ def nav_quiz_edit_page(driver, scrape_data):
     data_btn = driver.find_element_by_id(DATA_TAB_ID)
     timeoutCatcher(driver, data_btn.click)
 
+def nav_quiz_data_page(driver, scrape_data):
+    """
+    :param driver: selenium driver. Should currently be the page for entering the
+                   details of the quiz
+    :param scrape_data: named tuple of song data. Title, artist, lyrics
 
+    Enters details for the quiz and submits brings to the test page.
+    """
+
+    #HTML constants for element id/class names
+    IMPORT_DATA_TXT = "Import Data"
+    IMPORT_C = "submit-btn"
+    DATA_TXT_BOX_ID = "enter_box"
+
+    #open data page
+    driver.find_element_by_link_text(IMPORT_DATA_TXT).click()
+
+    #wait for text box to load
+    WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.ID, DATA_TXT_BOX_ID)))
+
+    #enter data into text box
+    text_box = driver.find_element_by_id(DATA_TXT_BOX_ID)
+    text_box.click()
+
+    for word in scrape_data.lyrics:
+        text_box.send_keys(word)
+        text_box.send_keys(Keys.RETURN)
+
+    #delete trailing return
+    text_box.send_keys(Keys.BACKSPACE)
+
+    #import
+    driver.find_element_by_class_name(IMPORT_C).click()
 
 if __name__ == "__main__":
     Song = namedtuple("Song", "title artist lyrics")
