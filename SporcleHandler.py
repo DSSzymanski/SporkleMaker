@@ -237,11 +237,18 @@ def nav_to_end(driver):
     :param driver: selenium driver. Should currently be the page for entering the
                    details of the quiz
 
-    Final navigation to the "finish up" tab. Leaves an open test quiz for person to
-    hand verify data is correctfor the lyrics
-    AKA
-    to see there's no issues with non ascii characters or weird punctuation
+    Final navigation to the "finish up" tab and making quiz private
     """
+
+    FINISH_ID = "donetab"
+    TOS_CHECK_BOX_ID = "accept-tos-checkbox"
+    PRIVATE_QUIZ_ID = "launch_private_quiz"
+
+    #navigate to finish up page and make quiz private before closing
+    driver.find_element_by_id(FINISH_ID).click()
+    driver.find_element_by_id(TOS_CHECK_BOX_ID).click()
+    driver.find_element_by_id(PRIVATE_QUIZ_ID).click()
+
 
 if __name__ == "__main__":
     Song = namedtuple("Song", "title artist lyrics sourceurl")
@@ -254,4 +261,5 @@ if __name__ == "__main__":
     nav_creation_page(driver, SL)
     nav_quiz_edit_page(driver, SL)
     nav_quiz_data_page(driver, SL)
-    #driver.close()
+    nav_to_end(driver)
+    driver.close()
