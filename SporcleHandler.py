@@ -232,6 +232,17 @@ def nav_quiz_data_page(driver, scrape_data):
     #import
     driver.find_element_by_class_name(IMPORT_C).click()
 
+def nav_to_end(driver):
+    """
+    :param driver: selenium driver. Should currently be the page for entering the
+                   details of the quiz
+
+    Final navigation to the "finish up" tab. Leaves an open test quiz for person to
+    hand verify data is correctfor the lyrics
+    AKA
+    to see there's no issues with non ascii characters or weird punctuation
+    """
+
 if __name__ == "__main__":
     Song = namedtuple("Song", "title artist lyrics sourceurl")
     SL = Song(title="Childhood's End", artist="Iron Maiden", lyrics=["hi", "my"], sourceurl = "https://www.lyrics.com/lyric/36440596/Childhood%E2%80%99s+End") #testing
