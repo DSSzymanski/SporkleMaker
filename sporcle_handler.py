@@ -1,6 +1,16 @@
-import config
-from collections import namedtuple
+"""
+This module is used to navigate through the sporcle website. Page will log in
+given the credentials listed in config.py and navigate the quiz creation page
+and create a quiz given the song information in song input.
 
+Run program will end and close out of the driver connection. It will initially
+create the quiz as private so that you can manually check that the quiz data
+was inputed correctly if desired before making the quiz public.
+
+Example:
+    sporcle_handler.run(song)
+"""
+#selenium imports
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -10,6 +20,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 #for timeout of main page load
 from selenium.common.exceptions import TimeoutException
+
+import config
 
 def run(song):
     """
@@ -28,7 +40,7 @@ def run(song):
     #close
     driver.close()
 
-def timeoutCatcher(driver, func, arg=None):
+def timeout_catcher(driver, func, arg=None):
     """
     :param driver: selenium driver
     :param func: function to be ran that loads new web page
@@ -48,12 +60,12 @@ def setup_driver():
     """
     Sets up driver and loads sporcle in a firefox page
     """
-    SPORCLE_QUIZ = "https://www.sporcle.com"
+    sporcle_quiz = "https://www.sporcle.com"
     driver = webdriver.Firefox()
     driver.set_page_load_timeout(30)
 
     #get base sporcle page
-    timeoutCatcher(driver, driver.get, SPORCLE_QUIZ)
+    timeout_catcher(driver, driver.get, sporcle_quiz)
 
     return driver
 
@@ -65,34 +77,29 @@ def nav_login_page(driver):
     frame. Should end on home page and logged in.
     """
     #get login information from config class
-    USER_EMAIL = config.get_username()
-    USER_PASSWORD = config.get_password()
+    user_email = config.get_username()
+    user_password = config.get_password()
 
     #HTML constants for element id/class names
-    LOGIN_BTN_ID = "user-not-logged-in"
-    USERNAME_C_NAME = "usernameInput"
-    PASSWORD_C_NAME = "passwordInput"
-    SUBMIT_BTN_C_NAME = "log-in-button"
-
-    """
-    TODO: driver page seems to NOT load login button (and a few others) if a
-    sporcle page is open in mozilla in another window
-    """
+    login_btn_id = "user-not-logged-in"
+    username_c_name = "usernameInput"
+    password_c_name = "passwordInput"
+    submit_btn_c_name = "log-in-button"
 
     #click login button to open new frame to login
-    driver.find_element_by_id(LOGIN_BTN_ID).click()
+    driver.find_element_by_id(login_btn_id).click()
 
     #wait until login frame has loaded
     WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.CLASS_NAME, USERNAME_C_NAME)))
+        EC.presence_of_element_located((By.CLASS_NAME, username_c_name)))
 
     #enter login information and submit login
-    driver.find_element_by_class_name(USERNAME_C_NAME).send_keys(USER_EMAIL)
-    driver.find_element_by_class_name(PASSWORD_C_NAME).send_keys(USER_PASSWORD)
-    submit = driver.find_element_by_class_name(SUBMIT_BTN_C_NAME)
+    driver.find_element_by_class_name(username_c_name).send_keys(user_email)
+    driver.find_element_by_class_name(password_c_name).send_keys(user_password)
+    submit = driver.find_element_by_class_name(submit_btn_c_name)
 
     #submits and loads new page
-    timeoutCatcher(driver=driver, func=submit.click)
+    timeout_catcher(driver=driver, func=submit.click)
 
 def nav_to_creation_page(driver):
     """
@@ -103,13 +110,13 @@ def nav_to_creation_page(driver):
     link to navigate to quiz creation page
     """
     #HTML constants for element id/class names
-    CREATE_TEXT = "CREATE"
-    NEW_QUIZ_TEXT = "CREATE A QUIZ"
+    create_text = "CREATE"
+    new_quiz_text = "CREATE A QUIZ"
 
     WebDriverWait(driver, 45).until(
-        EC.presence_of_element_located((By.LINK_TEXT, CREATE_TEXT)))
+        EC.presence_of_element_located((By.LINK_TEXT, create_text)))
     #store element to hover over to get the "create a quiz" link
-    hover_elem = driver.find_element_by_link_text(CREATE_TEXT)
+    hover_elem = driver.find_element_by_link_text(create_text)
 
     #execute hover
     actions = ActionChains(driver)
@@ -117,9 +124,9 @@ def nav_to_creation_page(driver):
     actions.perform()
 
     WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.LINK_TEXT, NEW_QUIZ_TEXT)))
+        EC.presence_of_element_located((By.LINK_TEXT, new_quiz_text)))
     #store new quiz element and click
-    new_quiz_elem = driver.find_element_by_link_text(NEW_QUIZ_TEXT)
+    new_quiz_elem = driver.find_element_by_link_text(new_quiz_text)
     actions.click(new_quiz_elem)
     actions.perform()
 
@@ -134,17 +141,17 @@ def nav_creation_page(driver, scrape_data):
     prompt = f'{scrape_data.title} lyrics by {scrape_data.artist}?'
 
     #HTML constants for element id/class names
-    NAME_ID = "game_name"
-    SUBMIT_BTN_ID = "submit"
+    name_id = "game_name"
+    submit_btn_id = "submit"
 
     WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.ID, NAME_ID)))
+        EC.presence_of_element_located((By.ID, name_id)))
     #sends prompt to quiz name field
-    driver.find_element_by_id(NAME_ID).send_keys(prompt)
+    driver.find_element_by_id(name_id).send_keys(prompt)
 
     #submit
-    submit_btn = driver.find_element_by_id(SUBMIT_BTN_ID)
-    timeoutCatcher(driver, submit_btn.click)
+    submit_btn = driver.find_element_by_id(submit_btn_id)
+    timeout_catcher(driver, submit_btn.click)
 
 def nav_quiz_edit_page(driver, scrape_data):
     """
@@ -160,33 +167,33 @@ def nav_quiz_edit_page(driver, scrape_data):
     answer_type = "Lyric"
 
     #HTML constants for element id/class names
-    DESC_NAME = "game_rightlingo"
-    TIMER_NAME = "game_timer"
-    ANSWER_TYPE_NAME = "game_enter_lingo"
-    HINT_HEADING_NAME = "game_element_name"
-    ANSWER_HEADING_NAME = "game_element_value"
-    CATEGORY_NAME = "category"
-    SAVE_BTN_NAME = "submitgame"
-    DATA_TAB_ID = "elementstab"
-    SOURCE_NAME = "sourceurl"
+    desc_name = "game_rightlingo"
+    timer_name = "game_timer"
+    answer_type_name = "game_enter_lingo"
+    hint_heading_name = "game_element_name"
+    answer_heading_name = "game_element_value"
+    category_name = "category"
+    save_btn_name = "submitgame"
+    data_tab_id = "elementstab"
+    source_name = "sourceurl"
 
     #wait until elements are loaded
     WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.NAME, DESC_NAME)))
+        EC.presence_of_element_located((By.NAME, desc_name)))
 
-    timer_elem = driver.find_element_by_name(TIMER_NAME)
-    category_elem = driver.find_element_by_name(CATEGORY_NAME)
+    timer_elem = driver.find_element_by_name(timer_name)
+    category_elem = driver.find_element_by_name(category_name)
 
     #fill out form input fields
-    driver.find_element_by_name(DESC_NAME).send_keys(desc_prompt)
+    driver.find_element_by_name(desc_name).send_keys(desc_prompt)
 
-    input_answer_type = driver.find_element_by_name(ANSWER_TYPE_NAME)
+    input_answer_type = driver.find_element_by_name(answer_type_name)
     input_answer_type.clear()
     input_answer_type.send_keys(answer_type)
 
-    driver.find_element_by_name(HINT_HEADING_NAME).clear()
-    driver.find_element_by_name(ANSWER_HEADING_NAME).clear()
-    driver.find_element_by_name(SOURCE_NAME).send_keys(scrape_data.sourceurl)
+    driver.find_element_by_name(hint_heading_name).clear()
+    driver.find_element_by_name(answer_heading_name).clear()
+    driver.find_element_by_name(source_name).send_keys(scrape_data.sourceurl)
 
     #fillout form quiz timer select field
     actions = ActionChains(driver)
@@ -208,11 +215,11 @@ def nav_quiz_edit_page(driver, scrape_data):
     driver.find_element_by_xpath("//select[@name='category']/option[text() = 'Music']").click()
 
     #save changes
-    driver.find_element_by_name(SAVE_BTN_NAME).click()
+    driver.find_element_by_name(save_btn_name).click()
 
     #open data tab
-    data_btn = driver.find_element_by_id(DATA_TAB_ID)
-    timeoutCatcher(driver, data_btn.click)
+    data_btn = driver.find_element_by_id(data_tab_id)
+    timeout_catcher(driver, data_btn.click)
 
 def nav_quiz_data_page(driver, scrape_data):
     """
@@ -224,19 +231,19 @@ def nav_quiz_data_page(driver, scrape_data):
     """
 
     #HTML constants for element id/class names
-    IMPORT_DATA_TXT = "Import Data"
-    IMPORT_C = "submit-btn"
-    DATA_TXT_BOX_ID = "enter_box"
+    import_data_txt = "Import Data"
+    import_c = "submit-btn"
+    data_txt_box_id = "enter_box"
 
     #open data page
-    driver.find_element_by_link_text(IMPORT_DATA_TXT).click()
+    driver.find_element_by_link_text(import_data_txt).click()
 
     #wait for text box to load
     WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.ID, DATA_TXT_BOX_ID)))
+        EC.presence_of_element_located((By.ID, data_txt_box_id)))
 
     #enter data into text box
-    text_box = driver.find_element_by_id(DATA_TXT_BOX_ID)
+    text_box = driver.find_element_by_id(data_txt_box_id)
     text_box.click()
 
     for word in scrape_data.lyrics:
@@ -247,7 +254,7 @@ def nav_quiz_data_page(driver, scrape_data):
     text_box.send_keys(Keys.BACKSPACE)
 
     #import
-    driver.find_element_by_class_name(IMPORT_C).click()
+    driver.find_element_by_class_name(import_c).click()
 
 def nav_to_end(driver):
     """
@@ -257,11 +264,11 @@ def nav_to_end(driver):
     Final navigation to the "finish up" tab and making quiz private
     """
 
-    FINISH_ID = "donetab"
-    TOS_CHECK_BOX_ID = "accept-tos-checkbox"
-    PRIVATE_QUIZ_ID = "launch_private_quiz"
+    finish_id = "donetab"
+    tos_check_box_id = "accept-tos-checkbox"
+    private_quiz_id = "launch_private_quiz"
 
     #navigate to finish up page and make quiz private before closing
-    driver.find_element_by_id(FINISH_ID).click()
-    driver.find_element_by_id(TOS_CHECK_BOX_ID).click()
-    #driver.find_element_by_id(PRIVATE_QUIZ_ID).click()
+    driver.find_element_by_id(finish_id).click()
+    driver.find_element_by_id(tos_check_box_id).click()
+    driver.find_element_by_id(private_quiz_id).click()
