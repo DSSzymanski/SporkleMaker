@@ -1,3 +1,11 @@
+"""
+This module scrapes the given web url and attempts to extract a set of lyrics
+from Lyrics.com. This will return a named tuple named song with title, artist,
+lyrics, and sourceurl fields. Lyrics is a list of lyrics and the rest are strings.
+
+Example:
+    web_scraper.run("https://www.lyrics.com/track/842202/Iron+Maiden/Childhood%27s+End")
+"""
 import urllib.request
 from collections import namedtuple
 from bs4 import BeautifulSoup
@@ -55,18 +63,12 @@ def get_lyrics(soup):
     lyrics = []
     raw = soup.find_all(id='lyric-body-text')[0].contents
     for line in raw:
-        """
-        line below eliminates <a> tags in lyrics where
-        the words are linked with definitions
-        """
+
+        #line below eliminates <a> tags in lyrics where the words are linked
+        #with definitions
+
         line = line.string
 
         lyrics += line.split()
 
     return lyrics
-
-#for testing purposes
-#TODO: remove after class is complete
-if __name__ == "__main__":
-    url = "https://www.lyrics.com/lyric/36440596/Childhood%E2%80%99s+End"
-    print(run(url))

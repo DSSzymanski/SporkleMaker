@@ -11,6 +11,23 @@ from selenium.webdriver.common.action_chains import ActionChains
 #for timeout of main page load
 from selenium.common.exceptions import TimeoutException
 
+def run(song):
+    """
+    :param scrape_data: named tuple of song data. Title, artist, lyrics, sourceurl
+
+    Main algorithm for the program
+    """
+    driver = setup_driver()
+    #navigate pages
+    nav_login_page(driver)
+    nav_to_creation_page(driver)
+    nav_creation_page(driver, song)
+    nav_quiz_edit_page(driver, song)
+    nav_quiz_data_page(driver, song)
+    nav_to_end(driver)
+    #close
+    driver.close()
+
 def timeoutCatcher(driver, func, arg=None):
     """
     :param driver: selenium driver
@@ -109,7 +126,7 @@ def nav_to_creation_page(driver):
 def nav_creation_page(driver, scrape_data):
     """
     :param driver: selenium driver. Should currently be the quiz creating page
-    :param scrape_data: named tuple of song data. Title, artist, lyrics
+    :param scrape_data: named tuple of song data. Title, artist, lyrics, sourceurl
 
     Navigates the sporcle page for creating the quiz
     """
@@ -133,7 +150,7 @@ def nav_quiz_edit_page(driver, scrape_data):
     """
     :param driver: selenium driver. Should currently be the page for entering the
                    details of the quiz
-    :param scrape_data: named tuple of song data. Title, artist, lyrics
+    :param scrape_data: named tuple of song data. Title, artist, lyrics, sourceurl
 
     Enters details for the quiz and submits brings to the test page.
     """
@@ -201,7 +218,7 @@ def nav_quiz_data_page(driver, scrape_data):
     """
     :param driver: selenium driver. Should currently be the page for entering the
                    details of the quiz
-    :param scrape_data: named tuple of song data. Title, artist, lyrics
+    :param scrape_data: named tuple of song data. Title, artist, lyrics, sourceurl
 
     Enters details for the quiz and submits brings to the test page.
     """
@@ -247,19 +264,4 @@ def nav_to_end(driver):
     #navigate to finish up page and make quiz private before closing
     driver.find_element_by_id(FINISH_ID).click()
     driver.find_element_by_id(TOS_CHECK_BOX_ID).click()
-    driver.find_element_by_id(PRIVATE_QUIZ_ID).click()
-
-
-if __name__ == "__main__":
-    Song = namedtuple("Song", "title artist lyrics sourceurl")
-    SL = Song(title="Childhood's End", artist="Iron Maiden", lyrics=["hi", "my"], sourceurl = "https://www.lyrics.com/lyric/36440596/Childhood%E2%80%99s+End") #testing
-
-    driver = setup_driver()
-
-    nav_login_page(driver)
-    nav_to_creation_page(driver)
-    nav_creation_page(driver, SL)
-    nav_quiz_edit_page(driver, SL)
-    nav_quiz_data_page(driver, SL)
-    nav_to_end(driver)
-    driver.close()
+    #driver.find_element_by_id(PRIVATE_QUIZ_ID).click()
