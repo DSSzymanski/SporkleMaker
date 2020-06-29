@@ -13,7 +13,6 @@ from bs4 import BeautifulSoup
 def run(url):
     """
     :param url: url from Lyrics.com
-    #TODO: validate URL
     #TODO: error handling:
        1. if page isn't found
        2. if page structure changes
